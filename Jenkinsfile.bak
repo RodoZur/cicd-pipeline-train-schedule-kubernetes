@@ -24,7 +24,11 @@ pipeline {
         }
         stage('Push Docker Image') {
             steps {
-                echo 'Running push docker automation'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-login') {
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("latest")
+                    }
                 }
             }
         }
