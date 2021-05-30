@@ -13,9 +13,6 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
-            when {
-                branch 'example-solution'
-            }
             steps {
                 script {
                     app = docker.build(DOCKER_IMAGE_NAME)
@@ -26,9 +23,6 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
-            when {
-                branch 'example-solution'
-            }
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-login') {
@@ -39,9 +33,6 @@ pipeline {
             }
         }
         stage('DeployToProduction') {
-            when {
-                branch 'example-solution'
-            }
             steps {
                 input 'Deploy to Production?'
                 milestone(1)
