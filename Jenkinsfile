@@ -1,7 +1,6 @@
 pipeline {
     agent any
     environment {
-        //be sure to replace "willbla" with your own Docker Hub username
         DOCKER_IMAGE_NAME = "rodozur/train-schedule"
     }
     stages {
@@ -14,20 +13,30 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                echo 'Running build docker automation'
+                script {
+                    app = docker.build(DOCKER_IMAGE_NAME)
+                    app.inside {
+                        sh 'echo Hello, World!'
+                    }
                 }
+            }
         }
         stage('Push Docker Image') {
             steps {
-                echo 'Running push docker automation'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-login') {
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("latest")
+                    }
                 }
+            }
         }
         stage('DeployToProduction') {
             steps {
                 input 'Deploy to Production?'
                 milestone(1)
                 kubernetesDeploy(
-                    kubeconfigId: 'kubeconfig-credential',
+                    kubeconfigId: 'kubeconfig',
                     configs: 'train-schedule-kube.yml',
                     enableConfigSubstitution: true
                 )
